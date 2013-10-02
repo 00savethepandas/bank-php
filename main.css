@@ -1,0 +1,9 @@
+body {
+    font-family:"Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+    padding: 70px;
+    margin: auto;
+}
+
+a:link {
+    text-decoration: none;
+}
