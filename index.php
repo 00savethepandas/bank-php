@@ -53,7 +53,7 @@ class homepage extends page {
             echo '<h1>Welcome to Bitty Bank</h1>';
         }
         function intro(){
-            $introPar = '<p>Welcome to Broke Bank. From setting up a checking or savings account to finding the right home loan, we can help.<br /> And for your investment needs, we offer online tools and resources to help you take 
+            $introPar = '<p>Welcome to Bitty Bank. From setting up a checking or savings account to finding the right home loan, we can help.<br /> And for your investment needs, we offer online tools and resources to help you take 
 control of your finances.</p>';
             return $introPar;
         }
