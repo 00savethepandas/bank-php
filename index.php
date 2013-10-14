@@ -2,7 +2,6 @@
 <?php
 
 $program = new program();
-
 class program {
     function __construct() {
         $page='homepage';
@@ -16,15 +15,26 @@ class program {
         // echo $page
         $page = new $page($arg);
         }
+
         function __destruct() {
         }
-}
+   }
+
 abstract class page{
         public $content;
         function menu() {
             $menu='<a href="./index.php"> Home &nbsp; &nbsp; &nbsp; </a>';
             $menu.='<a href="./index.php?page=login"> Login &nbsp; &nbsp; &nbsp; </a>';
+           // $menu.='<a href="./index.php?page=account"> My Account &nbsp; &nbsp; &nbsp; </a>';
+           // $menu.='<a href="./index.php?page=sessionTest"> Testing Session</a>';
+            return $menu;
+        } // Menu
+
+        function menu2() {
+            $menu='<a href="./index.php"> Home &nbsp; &nbsp; &nbsp; </a>';
+            $menu.='<a href="./index.php?page=logout"> Logout &nbsp; &nbsp; &nbsp; </a>';
             $menu.='<a href="./index.php?page=account"> My Account &nbsp; &nbsp; &nbsp; </a>';
+           // $menu.='<a href="./index.php?page=sessionTest"> Testing Session</a>';
             return $menu;
         } // Menu
 
@@ -42,6 +52,46 @@ abstract class page{
             echo $this->content;
         }
 } // Class Page
+/*
+class sessionTest extends page {
+        function __construct(){
+            $session = new sessionLogin();
+            $session->uLogin();
+        }
+}
+*/
+class session {
+       public function __construct(){
+            session_start();
+       }
+}
+
+class sessionLogin extends session {
+       public function uLogin(){
+            if(!isset($_SESSION['user'])){
+                echo ("<p>Session is not set. Login to start your session</p>");
+                } else {
+                echo ("<h1>Welcome back!</h1>");
+                echo ("<a href='./index.php?page=logout'><p>Log Out</p>");
+                session_unset();
+                }
+            }
+}
+
+class logout extends page {
+        function get(){
+            $this->content.=$this->menu();
+            $this->content.=$this->lheader();
+            $this->content.=$this->lmessage();
+        }
+        function lheader(){
+            echo ('<h1>Logout Successful</h1>');
+        }
+        function lmessage(){
+            $lmess = '<p>You have successfully logged out of your account. Thank you for using Bitty Bank</p>';
+            return $lmess;
+        }
+}
 
 class homepage extends page {
         function get() {
@@ -53,12 +103,10 @@ class homepage extends page {
             echo '<h1>Welcome to Bitty Bank</h1>';
         }
         function intro(){
-            $introPar = '<p>Welcome to Bitty Bank. From setting up a checking or savings account to finding the right home loan, we can help.<br /> And for your investment needs, we offer online tools and resources to help you take 
-control of your finances.</p>';
+            $introPar = '<p>Welcome to Broke Bank. From setting up a checking or savings account to finding the right home loan, we can help.<br /> And for your investment needs, we offer online tools and resources to help you take control of your finances.</p>';
             return $introPar;
         }
 } //Class Homepage
-
 class login extends page {
         function get(){
             $this->content.=$this->menu();
@@ -66,9 +114,9 @@ class login extends page {
             $this->content.=$this->lHeader();
         }
         function loginForm(){
-            $form ='<form action="index.php?page=login" method="post">
+            $form ='<form action="index.php?page=loginCheck" method="post">
             <p>
-           <label for="username">User Name</label><br />
+            <label for="username">User Name</label><br />
             <input type="text" name="username" id="username" /><br />
             <br />
             <label for="password">Password</label><br />
@@ -89,9 +137,25 @@ class login extends page {
         function lHeader(){
             echo '<h1>Login to Your Account</h1>';
         }
-        function post(){
-            print_r($_POST);
-        }
+}
+
+class loginCheck extends page {
+       function post(){
+           $defaultPassword = "password";
+           $defaultUser = "user";
+           $username = $_POST['username'];
+           $password = $_POST['password'];
+           // echo $username;
+           if ($username == $defaultUser && $password == $defaultPassword) {
+               $_SESSION['user']= "guest";
+               echo '<p>Session Array: </p>';
+                print_r($_SESSION);
+               echo '<h1>Welcome '.$username.'!</h1>';
+               $this->content.=$this->menu2();
+           } else {
+               echo '<p>You are not a registered user. Please return to the login page and register.</p>';
+           }
+       }
 }
 
 class forgotPW extends page {
@@ -150,71 +214,85 @@ class register extends page {
             return $rForm;
         }
 }
-
-class account extends page {
+class auWelcome extends page {
         function get(){
-            $this->content.=$this->aHeader();
-            $this->content.=$this->menu();
-            $this->content.=$this->transactionForm();
-            $this->content.=$this->aTable();
+            $this->content.=$this->auWelHeader();
+            $this->content.=$this->menu2();
+            $this->content.=$this->message();
         }
-        function aHeader(){
-            echo '<h1>Your Account</h1>';
+        function auWelHeader(){
+            echo '<h1>Welcome Back!</h1>';
         }
-        function transactionForm(){
-            $transForm='<form action="index.html?page=account" method="post">
-            <p>
-            <label for="date">Date</label><br />
-            <input type="date" name="date" id="date" /><br />
-            <br />
-            <label for="description">Short Description</label><br />
-            <input type="text" name="remail" id="remail" /><br />
-            <br />
-            <label for="deposit">Deposit</label><br />
-            <input type="text" name="deposit" id="deposit" /><br />
-            <br />
-            <label for="debit">Debit</label><br />
-            <input type="text" name="debit" id="debit" /><br />
-            <br />
-
-            <input type="submit" value="Send" /> &nbsp; &nbsp; <input type="reset" />
-            </p>          
-            </form>';
-            return $transForm;
+        function message(){
+            $welBack= '<p>Welcome back to Bitty Bank. Your loyalty is important to Bitty Bank.</p>';
         }
 
-/* My Account page ToDos:
-1. Have to remove echo statements from aTable, which I suspect is causing it's weird placement.
-2. Resolve MySQL issues, make a table to hold values with the username as the primary key and account trans.
-3. Retrieve the number of transactions from the table, post them to aTable, perform calculations for balance.
-*/
-        function aTable(){
-            $rows = 3;
-            $cols = 4;
-            $total = NULL;
-
-            echo '<table border="1" width="800px">';
-            echo '<tr><th>Date</th><th>Description</th><th>Credit</th><th>Debit</th>';
-                for($tr=1; $tr<=$rows; $tr++){
-                   echo "<tr height='25px'>";
-                        for($td=1;$td<=$cols; $td++){
-                           echo "<td>"."</td>";
-                         }
-                   echo "</tr>";
-                }
-            echo "</table><br /><br />";
-        }
 }
-/*
-class transactions extends page {
-       function get() {
-            $this->content.=$this->tHeader();
-            $this->content.=$this->menu();
-            //$this->content.=$this->trans;
-       }
-      function tHeader(){
-            echo '<h1>Account Transactions</h1>';
-       }
-}
-*/
-?>
+
+class account extends page { 
+        function get(){ 
+            $this->content.=$this->aHeader(); 
+            $this->content.=$this->menu2(); 
+            $this->content.=$this->transactionForm(); 
+            $this->content.=$this->aTable(); 
+        } 
+        function aHeader(){ 
+            echo '<h1>Your Account</h1>'; 
+        } 
+        function transactionForm(){ 
+            $transForm='<form action="index.html?page=account" method="post"> 
+            <p> 
+            <label for="date">Date</label><br /> 
+            <input type="date" name="date" id="date" /><br /> 
+            <br /> 
+            <label for="description">Short Description</label><br /> 
+            <input type="text" name="remail" id="remail" /><br /> 
+            <br /> 
+            <label for="deposit">Deposit</label><br /> 
+            <input type="text" name="deposit" id="deposit" /><br /> 
+            <br /> 
+            <label for="debit">Debit</label><br /> 
+            <input type="text" name="debit" id="debit" /><br /> 
+            <br /> 
+ 
+            <input type="submit" value="Send" /> &nbsp; &nbsp; <input type="reset" /> 
+            </p>           
+            </form>'; 
+            return $transForm; 
+        }    
+ 
+/* My Account page ToDos: 
+1. Have to remove echo statements from aTable, which I suspect is causing it's weird placement. 
+2. Resolve MySQL issues, make a table to hold values with the username as the primary key and account trans. 
+3. Retrieve the number of transactions from the table, post them to aTable, perform calculations for balance. 
+*/  
+        function aTable(){ 
+            $rows = 3; 
+            $cols = 4; 
+            $total = NULL; 
+             
+            echo '<table border="1" width="800px">'; 
+            echo '<tr><th>Date</th><th>Description</th><th>Credit</th><th>Debit</th>'; 
+                for($tr=1; $tr<=$rows; $tr++){ 
+                   echo "<tr height='25px'>"; 
+                        for($td=1;$td<=$cols; $td++){ 
+                           echo "<td>"."</td>"; 
+                         } 
+                   echo "</tr>"; 
+                } 
+            echo "</table><br /><br />";    
+        } 
+} 
+/* 
+class transactions extends page { 
+       function get() { 
+            $this->content.=$this->tHeader(); 
+            $this->content.=$this->menu(); 
+            //$this->content.=$this->trans; 
+       } 
+      function tHeader(){ 
+            echo '<h1>Account Transactions</h1>'; 
+       } 
+} 
+*/ 
+?> 
